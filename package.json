@@ -1,0 +1,17 @@
+{
+  "name": "cloudflare-email-ai-worker",
+  "version": "1.0.0",
+  "description": "AI-powered email auto-reply system using Cloudflare Workers",
+  "main": "worker.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "setup-db": "wrangler d1 execute email-ai-db --command=\"CREATE TABLE IF NOT EXISTS conversations (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, content TEXT NOT NULL, response TEXT NOT NULL, created_at TEXT NOT NULL); CREATE INDEX IF NOT EXISTS idx_email_date ON conversations(email, created_at);\""
+  },
+  "keywords": ["cloudflare", "workers", "email", "ai", "auto-reply", "d1"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

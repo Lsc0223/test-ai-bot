@@ -1,0 +1,32 @@
+name = "email-ai-worker"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# D1 数据库配置
+[[d1_databases]]
+binding = "DB"
+database_name = "email-ai-db"
+database_id = "your-database-id"
+
+# 环境变量配置
+[vars]
+# 这些是非敏感的默认值，敏感信息请使用 wrangler secret put 命令设置
+
+# AI API 配置
+AI_API_BASE_URL = "https://api.openai.com/v1"
+AI_MODEL = "gpt-3.5-turbo"
+AI_MAX_TOKENS = "500"
+AI_TEMPERATURE = "0.7"
+
+# SMTP 配置
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "587"
+
+# 回复邮箱
+REPLY_EMAIL = "your-reply@example.com"
+
+# 需要通过 wrangler secret put 设置的敏感变量：
+# AI_API_KEY - AI API 密钥
+# SMTP_API_KEY - SMTP2GO API 密钥（如果使用）
+# SMTP_USER - SMTP 用户名
+# SMTP_PASS - SMTP 密码
