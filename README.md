@@ -1,6 +1,54 @@
-# Cloudflare Email AI Worker
+# ✉️ Cloudflare Email AI Worker
 
-一个基于 Cloudflare Workers 的智能邮件自动回复系统，支持 AI 生成回复和上下文存储。
+<div align="center">
+  <h1>✉️ 智能邮件自动回复系统</h1>
+  <p>基于 Cloudflare Workers 的 AI 驱动邮件助手，让邮件回复更智能、更高效</p>
+  
+  <p>
+    <img src="https://img.shields.io/badge/Cloudflare-Workers-orange?style=flat-square&logo=cloudflare" alt="Cloudflare Workers">
+    <img src="https://img.shields.io/badge/AI-Powered-blue?style=flat-square&logo=openai" alt="AI Powered">
+    <img src="https://img.shields.io/badge/Database-D1-green?style=flat-square&logo=sqlite" alt="D1 Database">
+    <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License">
+  </p>
+</div>
+
+## 🚀 一键部署
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Lsc0223/test-ai-bot)
+
+> **注意**: 部署后需要配置环境变量和 D1 数据库绑定才能正常使用。
+
+## 📋 项目介绍
+
+这是一个现代化的智能邮件处理系统，专为需要自动化邮件回复的个人和企业设计。系统利用先进的 AI 技术，结合 Cloudflare 的全球边缘网络，为用户提供快速、智能、个性化的邮件自动回复服务。
+
+### 🎯 核心优势
+
+- **🧠 智能回复**: 基于 GPT 等先进 AI 模型，生成自然、相关的邮件回复
+- **💾 上下文记忆**: 使用 D1 数据库存储对话历史，提供连贯的多轮对话体验
+- **⚡ 全球加速**: 依托 Cloudflare 边缘网络，确保全球范围内的快速响应
+- **🔧 高度可定制**: 支持自定义 AI 提示词，适应不同的业务场景和回复风格
+- **🛡️ 安全可靠**: 企业级安全保障，敏感信息加密存储
+- **💰 成本效益**: 基于 Serverless 架构，按需付费，无需维护服务器
+
+### 🏢 适用场景
+
+- **客户服务**: 自动回复客户咨询，提供 24/7 支持
+- **个人助理**: 处理日常邮件，智能分类和回复
+- **营销推广**: 个性化回复潜在客户询问
+- **技术支持**: 自动回答常见技术问题
+- **商务沟通**: 维护专业的商务邮件往来
+
+## ✨ 功能特性
+
+- 📧 **自动邮件处理**: 实时接收和处理入站邮件
+- 🤖 **AI 智能回复**: 基于邮件内容生成个性化回复
+- 💾 **对话上下文**: D1 数据库存储完整对话历史
+- ⚙️ **灵活配置**: 通过环境变量配置所有参数
+- 🎯 **自定义提示词**: 完全控制 AI 回复的风格和行为
+- 🔄 **多 SMTP 支持**: 兼容主流邮件服务商
+- 📊 **状态监控**: 内置健康检查和日志记录
+- 🔒 **安全加密**: 敏感信息安全存储和传输
 
 ## 一键部署
 
