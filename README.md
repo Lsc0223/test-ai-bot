@@ -4,7 +4,7 @@
 
 ## 一键部署
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/your-username/test-ai-bot)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Lsc0223/test-ai-bot)
 
 > **注意**: 部署后需要配置环境变量和 D1 数据库绑定才能正常使用。
 
