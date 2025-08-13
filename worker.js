@@ -101,7 +101,7 @@ async function getConversationContext(db, fromEmail) {
 
 // 使用 AI 生成回复
 async function generateAIResponse(subject, content, context, env) {
-  const systemPrompt = `你是一个专业的邮件助手。请根据邮件内容生成合适的回复。
+  const defaultPrompt = `你是一个专业的邮件助手。请根据邮件内容生成合适的回复。
 回复要求：
 1. 语气友好专业
 2. 内容简洁明了
@@ -109,6 +109,8 @@ async function generateAIResponse(subject, content, context, env) {
 4. 使用中文回复（除非原邮件是其他语言）
 
 邮件主题：${subject}`
+
+  const systemPrompt = env.AI_SYSTEM_PROMPT || defaultPrompt
 
   const messages = [{ role: "system", content: systemPrompt }]
 
