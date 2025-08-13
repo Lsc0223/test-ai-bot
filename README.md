@@ -2,6 +2,12 @@
 
 一个基于 Cloudflare Workers 的智能邮件自动回复系统，支持 AI 生成回复和上下文存储。
 
+## 一键部署
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/your-username/test-ai-bot)
+
+> **注意**: 部署后需要配置环境变量和 D1 数据库绑定才能正常使用。
+
 ## 功能特性
 
 - 📧 自动接收和处理邮件
