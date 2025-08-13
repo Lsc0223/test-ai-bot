@@ -187,6 +187,7 @@ async function sendReply(originalEmail, replyContent, env) {
         "X-Smtp2go-Api-Key": env.SMTP_API_KEY,
       },
       body: JSON.stringify({
+        api_key: env.SMTP_API_KEY, // 添加 api_key 到请求体
         sender: env.REPLY_EMAIL,
         to: [originalEmail.from],
         subject: replySubject,
@@ -212,26 +213,56 @@ async function sendReply(originalEmail, replyContent, env) {
 // 备用 SMTP 发送方案
 async function sendReplyFallback(originalEmail, replyContent, env) {
   try {
-    // 使用 Cloudflare 的 fetch 发送到 SMTP 服务
-    const response = await fetch(`https://${env.SMTP_HOST}:${env.SMTP_PORT}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${btoa(`${env.SMTP_USER}:${env.SMTP_PASS}`)}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: env.REPLY_EMAIL,
-        to: originalEmail.from,
-        subject: originalEmail.subject.startsWith("Re:") ? originalEmail.subject : `Re: ${originalEmail.subject}`,
-        text: replyContent,
-      }),
-    })
+    if (env.RESEND_API_KEY) {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: env.REPLY_EMAIL,
+          to: [originalEmail.from],
+          subject: originalEmail.subject.startsWith("Re:") ? originalEmail.subject : `Re: ${originalEmail.subject}`,
+          text: replyContent,
+          html: replyContent.replace(/\n/g, "<br>"),
+        }),
+      })
 
-    if (response.ok) {
-      console.log(`Fallback reply sent to ${originalEmail.from}`)
+      if (response.ok) {
+        console.log(`Resend fallback reply sent to ${originalEmail.from}`)
+        return
+      }
     }
+
+    const smtpPort = env.SMTP_PORT || "587"
+    const smtpUrl = `https://smtp-relay.sendinblue.com/api/v3/smtp/email` // 使用 Sendinblue 作为备用
+
+    if (env.SENDINBLUE_API_KEY) {
+      const response = await fetch(smtpUrl, {
+        method: "POST",
+        headers: {
+          "api-key": env.SENDINBLUE_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: { email: env.REPLY_EMAIL },
+          to: [{ email: originalEmail.from }],
+          subject: originalEmail.subject.startsWith("Re:") ? originalEmail.subject : `Re: ${originalEmail.subject}`,
+          textContent: replyContent,
+          htmlContent: replyContent.replace(/\n/g, "<br>"),
+        }),
+      })
+
+      if (response.ok) {
+        console.log(`Sendinblue fallback reply sent to ${originalEmail.from}`)
+        return
+      }
+    }
+
+    throw new Error("All SMTP methods failed")
   } catch (error) {
-    console.error("Fallback SMTP also failed:", error)
+    console.error("All fallback SMTP methods failed:", error)
   }
 }
 

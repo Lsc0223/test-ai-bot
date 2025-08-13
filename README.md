@@ -16,7 +16,7 @@
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Lsc0223/test-ai-bot)
 
-> **注意**: 部署后需要配置环境变量和 D1 数据库绑定才能正常使用。
+> **注意**: 部署后需要配置环境变量、D1 数据库绑定并运行初始化脚本才能正常使用。
 
 ## 📋 项目介绍
 
@@ -46,28 +46,13 @@
 - 💾 **对话上下文**: D1 数据库存储完整对话历史
 - ⚙️ **灵活配置**: 通过环境变量配置所有参数
 - 🎯 **自定义提示词**: 完全控制 AI 回复的风格和行为
-- 🔄 **多 SMTP 支持**: 兼容主流邮件服务商
+- 🔄 **多 SMTP 支持**: 兼容主流邮件服务商，支持多重备用方案
 - 📊 **状态监控**: 内置健康检查和日志记录
 - 🔒 **安全加密**: 敏感信息安全存储和传输
 
-## 一键部署
+## 快速部署
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Lsc0223/test-ai-bot)
-
-> **注意**: 部署后需要配置环境变量和 D1 数据库绑定才能正常使用。
-
-## 功能特性
-
-- 📧 自动接收和处理邮件
-- 🤖 使用 AI 生成个性化回复
-- 💾 D1 数据库存储对话上下文
-- ⚙️ 环境变量配置所有参数
-- 🎯 自定义 AI 回复提示词
-- 🔄 支持多种 SMTP 服务商
-
-## 快速部署（推荐）
-
-### 方法一：Cloudflare Dashboard 部署
+### 方法一：Cloudflare Dashboard 部署（推荐）
 
 1. **登录 Cloudflare Dashboard**
    - 访问 [dash.cloudflare.com](https://dash.cloudflare.com)
@@ -95,17 +80,30 @@
      - Variable name: `DB`
      - D1 database: 选择刚创建的数据库
 
-6. **配置环境变量**
+6. **初始化数据库**
+   - 在 D1 数据库控制台中，点击 "Console"
+   - 运行以下 SQL 脚本：
+   \`\`\`sql
+   CREATE TABLE IF NOT EXISTS conversations (
+     id INTEGER PRIMARY KEY AUTOINCREMENT,
+     email TEXT NOT NULL,
+     content TEXT NOT NULL,
+     response TEXT NOT NULL,
+     created_at TEXT NOT NULL
+   );
+   
+   CREATE INDEX IF NOT EXISTS idx_email_date 
+   ON conversations(email, created_at);
+   \`\`\`
+
+7. **配置环境变量**
    在 "Environment Variables" 中添加以下变量：
 
    **必需变量：**
    \`\`\`
    AI_API_KEY = your_openai_api_key (加密)
    REPLY_EMAIL = your-reply@example.com
-   SMTP_HOST = smtp.gmail.com
-   SMTP_PORT = 587
-   SMTP_USER = your-email@gmail.com (加密)
-   SMTP_PASS = your-app-password (加密)
+   SMTP_API_KEY = your_smtp2go_api_key (加密)
    \`\`\`
 
    **可选变量：**
@@ -115,12 +113,9 @@
    AI_MAX_TOKENS = 500
    AI_TEMPERATURE = 0.7
    AI_SYSTEM_PROMPT = 你是一个专业的邮件助手...
-   SMTP_API_KEY = your_smtp2go_key (如使用 SMTP2GO，加密)
+   RESEND_API_KEY = your_resend_key (备用邮件服务，加密)
+   SENDINBLUE_API_KEY = your_sendinblue_key (备用邮件服务，加密)
    \`\`\`
-
-7. **初始化数据库**
-   - 部署完成后，访问：`https://your-worker.your-subdomain.workers.dev/setup-db`
-   - 看到 "Database initialized successfully" 表示成功
 
 8. **配置邮件路由**
    - 在 Cloudflare Dashboard 中进入 "Email Routing"
@@ -142,16 +137,15 @@ wrangler d1 create email-ai-db
 
 # 更新 wrangler.toml 中的数据库 ID
 
+# 初始化数据库表
+wrangler d1 execute email-ai-db --file=./scripts/init-database.sql
+
 # 设置敏感环境变量
 wrangler secret put AI_API_KEY
-wrangler secret put SMTP_USER
-wrangler secret put SMTP_PASS
+wrangler secret put SMTP_API_KEY
 
 # 部署
 wrangler deploy
-
-# 初始化数据库
-curl -X POST https://your-worker.your-subdomain.workers.dev/setup-db
 \`\`\`
 
 ## 环境变量详细说明
@@ -165,11 +159,9 @@ curl -X POST https://your-worker.your-subdomain.workers.dev/setup-db
 - `AI_SYSTEM_PROMPT`: 自定义 AI 回复的系统提示词，用于控制回复风格和行为
 
 ### SMTP 配置
-- `SMTP_HOST`: SMTP 服务器地址 **(必需)**
-- `SMTP_PORT`: SMTP 端口，默认 587
-- `SMTP_USER`: SMTP 用户名 **(必需，加密)**
-- `SMTP_PASS`: SMTP 密码或应用专用密码 **(必需，加密)**
-- `SMTP_API_KEY`: SMTP2GO API 密钥（可选，加密）
+- `SMTP_API_KEY`: SMTP2GO API 密钥 **(推荐，加密)**
+- `RESEND_API_KEY`: Resend 服务 API 密钥（备用方案，加密）
+- `SENDINBLUE_API_KEY`: Sendinblue API 密钥（备用方案，加密）
 
 ### 其他配置
 - `REPLY_EMAIL`: 回复邮箱地址 **(必需)**
@@ -200,28 +192,30 @@ curl -X POST https://your-worker.your-subdomain.workers.dev/setup-db
 你是一个创意营销专家，请用有趣、吸引人的语气回复邮件。保持品牌调性，适当使用emoji，让回复更加生动有趣。
 \`\`\`
 
-## 常见 SMTP 配置
+## 推荐 SMTP 服务配置
 
-### Gmail
+### SMTP2GO（推荐）
 \`\`\`
-SMTP_HOST = smtp.gmail.com
-SMTP_PORT = 587
-SMTP_USER = your-email@gmail.com
-SMTP_PASS = your-16-digit-app-password
+SMTP_API_KEY = api-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 \`\`\`
+- 免费额度：1000 封/月
+- 高送达率，专业邮件服务
+- API 简单易用
 
-### Outlook/Hotmail
+### Resend（备用推荐）
 \`\`\`
-SMTP_HOST = smtp-mail.outlook.com
-SMTP_PORT = 587
-SMTP_USER = your-email@outlook.com
-SMTP_PASS = your-password
+RESEND_API_KEY = re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 \`\`\`
+- 免费额度：3000 封/月
+- 现代化 API，开发者友好
+- 优秀的送达率
 
-### SMTP2GO（推荐用于生产环境）
+### Sendinblue（备用选择）
 \`\`\`
-SMTP_API_KEY = your-smtp2go-api-key
+SENDINBLUE_API_KEY = xkeysib-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 \`\`\`
+- 免费额度：300 封/天
+- 功能丰富的邮件平台
 
 ## 使用方法
 
@@ -230,7 +224,7 @@ SMTP_API_KEY = your-smtp2go-api-key
    - 系统会自动生成 AI 回复并发送
 
 2. **监控状态**
-   - 访问 `https://your-worker.workers.dev/health` 检查系统状态
+   - 访问 `https://your-worker.workers.dev/` 检查系统状态
    - 在 Cloudflare Dashboard 中查看 Worker 日志
 
 3. **管理对话**
@@ -241,25 +235,31 @@ SMTP_API_KEY = your-smtp2go-api-key
 
 ### 常见问题
 
-1. **邮件无法发送**
-   - 检查 SMTP 配置是否正确
-   - 确认邮箱密码是应用专用密码（Gmail）
+1. **数据库错误 "no such table: conversations"**
+   - 确认已正确运行数据库初始化脚本
+   - 在 D1 控制台中手动执行 SQL 创建表
+
+2. **SMTP API 错误**
+   - 检查 API 密钥格式是否正确（SMTP2GO 格式：api-xxxxx）
+   - 确认 API 密钥有效且有足够配额
    - 查看 Worker 日志获取详细错误信息
 
-2. **AI 回复异常**
+3. **AI 回复异常**
    - 验证 AI_API_KEY 是否有效
    - 检查 API 配额是否充足
    - 确认网络连接正常
 
-3. **数据库错误**
-   - 确认 D1 数据库已正确绑定
-   - 访问 `/setup-db` 重新初始化数据库
+4. **邮件无法发送**
+   - 检查主要和备用 SMTP 配置
+   - 确认发件邮箱地址格式正确
+   - 查看 Worker 日志了解具体错误
 
 ### 获取帮助
 
 - 查看 Cloudflare Workers 文档
 - 检查 Worker 运行日志
 - 确认所有环境变量配置正确
+- 测试各个 SMTP 服务的 API 密钥
 
 ## 安全建议
 
@@ -267,3 +267,4 @@ SMTP_API_KEY = your-smtp2go-api-key
 - 定期更换 API 密钥和密码
 - 监控 Worker 的使用情况和日志
 - 考虑设置速率限制防止滥用
+- 定期备份 D1 数据库数据
